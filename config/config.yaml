@@ -1,0 +1,23 @@
+app:
+  port: 8080
+  version: "V1.0.0"
+  do_migrations: true
+database:
+  host: localhost
+  port: 5432
+  user: postgres
+  password: secret
+  dbname: fs_test
+  sslmode: disable
+
+email:
+  smtp_host: smtp.example.com
+  smtp_port: 587
+  username: user@example.com
+  password: emailpassword
+  sender_email: sender@example.com
+
+metrics:
+  enabled: true
+  path: /metrics
+  port: 9090

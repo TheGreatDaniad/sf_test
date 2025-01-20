@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./config:/app/config
+    environment:
+      - APP_PORT=8080
+      - APP_DATABASE_HOST=database
+      - APP_DATABASE_PORT=5432
+      - APP_DATABASE_USER=postgres
+      - APP_DATABASE_PASSWORD=secret
+      - APP_DATABASE_DBNAME=sf_test
+      - APP_DATABASE_SSLMODE=disable
+    depends_on:
+      - database
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+        echo "Waiting for database to be ready..."
+        until pg_isready -h database -p 5432 -U postgres; do
+          sleep 1
+        done
+        echo "Starting application..."
+        ./main
+
+  database:
+    image: postgres:15
+    container_name: sf_test_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: sf_test
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - prometheus_data:/prometheus
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    restart: always
+
+  postgres-exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter:latest
+    container_name: postgres_exporter
+    restart: always
+    environment:
+      DATA_SOURCE_NAME: "postgresql://postgres:secret@database:5432/sf_test?sslmode=disable"
+    ports:
+      - "9187:9187"
+    depends_on:
+      - database
+
+volumes:
+  db_data:
+  prometheus_data:
