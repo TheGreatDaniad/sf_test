@@ -1,0 +1,9 @@
+The system is designed to handle multiple mailboxes with a daily limit of 30 emails each, while also ensuring emails are sent in equal intervals within the specified hours of the sequence. The core idea is to break down tasks into manageable pieces and use a combination of scheduling, database transactions, and workers to achieve this.
+
+For sequences, each step defines the wait days, email content, and subject. When a sequence is activated, the system calculates when each email needs to go out. For example, if a step has a 2-day wait, it schedules the emails accordingly. All this information, including the contacts and which mailbox will handle the emails, is stored in a queue table in the database.
+
+Mailboxes are used efficiently by keeping track of how many emails they’ve sent each day. The system assigns emails to mailboxes evenly, ensuring none exceed the 30-email limit. If there are more contacts than a single mailbox can handle in a day, the emails roll over to the next day. This way, all contacts are eventually reached without violating the limits.
+
+Workers continuously poll the queue, pick up emails ready to be sent, and process them. They ensure the email goes out using the assigned mailbox and update the task status in the database. If something fails (e.g., a network issue or the email server is down), the task is retried after a short delay. Retries use exponential backoff, meaning the wait time increases with each failure, up to a maximum number of attempts.
+
+The design is highly scalable. If you need to handle more emails, you can just add more workers or mailboxes. The database-backed queue and transactions ensure consistency, so no task is lost or processed twice. Prometheus metrics keep track of everything, like how many emails were sent, failed, or retried, so you can monitor the system in real-time.

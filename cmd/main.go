@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"log"
 	"net/http"
 	"strconv"
@@ -11,8 +10,6 @@ import (
 	"sf_test/internal/api"
 	"sf_test/internal/core"
 	"sf_test/internal/db"
-	"sf_test/internal/worker"
-	"sf_test/pkg/email"
 	"sf_test/pkg/logger"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -56,15 +53,6 @@ func main() {
 
 	appLogger.Info("Connected to the database")
 
-	// Initialize email client
-	emailClient := email.NewEmailClient(
-		cfg.Email.SMTPHost,
-		cfg.Email.SMTPPort,
-		cfg.Email.Username,
-		cfg.Email.Password,
-		cfg.Email.SenderEmail,
-	)
-
 	// Initialize repositories
 	sequenceRepo := db.NewSequenceRepository(dbConn)
 	stepRepo := db.NewStepRepository(dbConn)
@@ -72,23 +60,6 @@ func main() {
 	// Initialize services
 	sequenceService := core.NewSequenceService(sequenceRepo)
 	stepService := core.NewStepService(stepRepo)
-
-	// Initialize worker
-	emailWorker := worker.NewEmailWorker(emailClient)
-	scheduler := worker.NewScheduler(stepService, emailWorker)
-
-	// Start email scheduling (example sequence ID)
-	go func() {
-		sequenceID := int64(1)
-		ctx := context.Background()
-
-		err := scheduler.ScheduleEmails(ctx, sequenceID)
-		if err != nil {
-			appLogger.Error(err)
-		} else {
-			appLogger.Info("Email scheduling completed for sequence ID: " + strconv.FormatInt(sequenceID, 10))
-		}
-	}()
 
 	// Initialize handlers
 	sequenceHandler := api.NewSequenceHandler(sequenceService)
