@@ -49,7 +49,7 @@ func NewRouter(routes *Routes) *mux.Router {
 
 	// Sequence routes
 	api.HandleFunc("/sequences", routes.SequenceHandler.CreateSequence).Methods(http.MethodPost)
-	api.HandleFunc("/sequences/{id}/tracking", routes.SequenceHandler.UpdateTracking).Methods(http.MethodPut)
+	api.HandleFunc("/sequences/{id}", routes.SequenceHandler.UpdateTracking).Methods(http.MethodPut)
 	api.HandleFunc("/sequences/{id}", routes.SequenceHandler.GetSequence).Methods(http.MethodGet)
 
 	// Step routes

@@ -70,6 +70,23 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Sequence'
+            example:
+              name: "Marketing Sequence"
+              openTrackingEnabled: true
+              clickTrackingEnabled: false
+              steps: 
+                - subject: "Welcome to our platform!"
+                  content: "Thank you for signing up. Let us know if you have any questions."
+                  waitDays: 0
+                  stepOrder: 1
+                - subject: "Get started with these tips"
+                  content: "Here are a few tips to help you get started."
+                  waitDays: 2
+                  stepOrder: 2
+                - subject: "Need help?"
+                  content: "We’re here to help if you need assistance."
+                  waitDays: 5
+                  stepOrder: 3
       responses:
         '201':
           description: Sequence created successfully

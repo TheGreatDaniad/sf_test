@@ -52,7 +52,6 @@ func (h *SequenceHandler) UpdateTracking(w http.ResponseWriter, r *http.Request)
 		WriteResponse(w, http.StatusBadRequest, ErrorResponse(err.Error(), "Invalid request body"))
 		return
 	}
-
 	err = h.sequenceService.UpdateTracking(r.Context(), id, payload.OpenTracking, payload.ClickTracking)
 	if err != nil {
 		WriteResponse(w, http.StatusInternalServerError, ErrorResponse(err.Error(), "Failed to update tracking"))
